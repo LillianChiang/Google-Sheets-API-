@@ -1,0 +1,64 @@
+const sheets = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1JPbH9TuUeF3MYWz6LTcxivkZ17YDCq0Z45JXKbNSn4k/edit#gid=0");
+const sheet = sheets.getSheetByName("page1");
+
+function generateId() {
+  return 'ID_' + new Date().getTime(); // Basic example, you can modify this format as needed
+}
+
+function doPost(e) {
+  const data = e.parameter;
+  const timestamp = new Date();
+  const id = generateId(); // Generate ID
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  sheet.appendRow([id,  data.neck,
+        data.chest_Bust,
+        data.shoulder,
+        data.stomach,
+        data.back,
+        data.arm,
+        data.waist,
+        data.hips,
+        data.outleg,, timestamp, timestamp]); // Appending both timestamps
+  return ContentService.createTextOutput("Your message was successfully sent to the Google Sheet database!");
+}
+
+ //This function processes the POST request from the form submission
+//  function doPost(e) {
+//    let data = e.parameter;
+//    const timestamp = new Date();
+//    const id = generateId(); // Generate ID
+//    sheet.appendRow([id, data.Name, data.Email, data.Message, timestamp]);
+//    return ContentService.createTextOutput("Your message was successfully sent to the Google Sheet database!");
+//  }
+
+// This function retrieves data from the sheet
+function getData() {
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+  return values.slice(1); // Exclude header row if it exists
+}
+
+// This function retrieves data by ID
+function getDataById(id, data) {
+  return data.find(row => row[0] == id); // Assuming the ID is in the first column (index 0)
+}
+
+// This function processes the GET request
+function processGetRequest(e) {
+  const data = getData();
+  const queryId = e.parameter.id; // assuming 'id' is the parameter for querying by ID
+  
+  if (queryId) {
+    const result = getDataById(queryId, data);
+    return ContentService.createTextOutput(JSON.stringify(result || "ID not found"));
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(data));
+}
+
+// This function handles the GET request
+function doGet(e) {
+  return processGetRequest(e);
+}
+
